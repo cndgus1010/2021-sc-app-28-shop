@@ -1,13 +1,14 @@
-const fs = require('fs-extra');
 const path = require('path');
+const fs = require('fs-extra');
 const Sequelize = require('sequelize');
 const config = {
   username: process.env.DB_USER,
   password: process.env.DB_PASS,
   database: process.env.DB_NAME,
   host: process.env.DB_HOST,
-  dialect: process.env.DIALECT,
+  dialect: process.env.DB_DIALECT,
 };
+const db = {};
 
 const sequelize = new Sequelize(
   config.database,
