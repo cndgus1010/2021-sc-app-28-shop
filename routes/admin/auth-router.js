@@ -3,6 +3,8 @@ const express = require('express');
 const router = express.Router();
 const { error } = require('../../modules/util');
 
-router.use('/', (req, res, next) => {});
+router.get(['/', '/login'], (req, res, next) => {
+  res.send('login');
+});
 
-module.exports = router;
+module.exports = { name: '/auth', router };
