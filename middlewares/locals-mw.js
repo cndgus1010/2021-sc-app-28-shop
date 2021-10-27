@@ -6,7 +6,8 @@ module.exports = (req, res, next) => {
   const currentPaths = req.originalUrl.split('/');
   currentPaths.shift();
   res.locals.currentPaths = currentPaths;
-  res.locals.secondPath = '/' + currentPaths[0] + (currentPaths[1] ? '/' + currentPaths[1] : '');
+  res.locals.secondPath =
+    '/' + currentPaths[0] + (currentPaths[1] ? '/' + currentPaths[1] : '');
   next();
 };
 
