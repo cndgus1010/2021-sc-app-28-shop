@@ -8,11 +8,9 @@
       </div>
     </li>
   </ul>
-  <%- //include('../inc/pager.ejs') %> 
+  <%- //include('../inc/pager.ejs') %>
+    <div class="text-center my-4">
+      <a href="/admin/board?type=create" class="btn btn-primary">글작성</a>
+    </div>
 </article>
-<script>
-  $('.board-container.list-page.gallery-type .list').click(onBoardListClick);
-  function onBoardListCLick() {
-    location.href = $(this).data('link') + '?type=gallery';
-  }
-</script>
+<script src="/js/board/board.js"></script>
