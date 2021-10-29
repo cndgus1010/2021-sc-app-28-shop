@@ -1,4 +1,3 @@
-<% let { current, currents, second, init } = path %>
 <header class="header-wrapper">
   <div class="header-top">
     <h1 class="logo">
@@ -15,14 +14,14 @@
   </div>
   <nav class="navi-wrap">
     <% for(let v of init.main) { %>
-    <a href="<%= v.link %>" class="navi" <%=(v.target ? `target="${v.target}" ` : '' ) %>>
-      <% if(v.path.includes(second)) { %>
-      <img src="/img/admin/<%= v.src %>_on.jpg" alt="icon" class="mw-100">
-      <% } else { %>
-      <img src="/img/admin/<%= v.src %>.jpg" alt="icon" class="mw-100">
+      <a href="<%= v.link %>" class="navi" <%=(v.target ? `target="${v.target}" ` : '' ) %>>
+        <% if(v.path.includes(second)) { %>
+          <img src="/img/admin/<%= v.src %>_on.jpg" alt="icon" class="mw-100">
+          <% } else { %>
+            <img src="/img/admin/<%= v.src %>.jpg" alt="icon" class="mw-100">
+            <% } %>
+      </a>
       <% } %>
-    </a>
-    <% } %>
   </nav>
   <%- include('./tab.ejs') %>
 </header>
