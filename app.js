@@ -13,7 +13,7 @@ const locals = require('./middlewares/locals-mw');
 const { sequelize } = require('./models');
 
 /*************** sequelize init **************/
-require('./modules/sequelize-init')(sequelize);
+require('./modules/sequelize-init')(sequelize, true);
 
 /*************** server init **************/
 require('./modules/server-init')(app, process.env.PORT);
@@ -53,6 +53,7 @@ const apiRouter = require('./routes/api');
 
 app.use('/admin', adminRouter);
 app.use('/api', apiRouter);
+
 /**************** error init **************/
 const _404Router = require('./routes/error/404-router');
 const _500Router = require('./routes/error/500-router');

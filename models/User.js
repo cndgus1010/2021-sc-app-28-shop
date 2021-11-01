@@ -1,3 +1,5 @@
+const bcrypt = require('bcrypt');
+
 module.exports = (sequelize, DataType) => {
   const User = sequelize.define(
     'User',
@@ -12,10 +14,19 @@ module.exports = (sequelize, DataType) => {
         type: DataType.STRING(24),
         allowNull: false,
         unique: true,
+        validate: {
+          isAlphanumeric: true,
+          len: [6, 24],
+        },
       },
       userpw: {
-        type: DataType.STRING(255),
+        type: DataType.CHAR(60),
         allowNull: false,
+        set(value) {
+          const { BCRYPT_SALT: salt, BCRYPT_ROUND: rnd } = process.env;
+          const hash = bcrypt.hashSync(value + salt, Number(rnd));
+          this.setDataValue('userpw', hash);
+        },
       },
       username: {
         type: DataType.STRING(255),
@@ -41,7 +52,7 @@ module.exports = (sequelize, DataType) => {
         */
         values: ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9'],
         allowNull: false,
-        default: '2',
+        defaultValue: '2',
       },
       addrPost: {
         type: DataType.CHAR(5),
@@ -58,6 +69,24 @@ module.exports = (sequelize, DataType) => {
       addrDetail: {
         type: DataType.STRING(255),
       },
+      tel1: {
+        type: DataType.STRING(4),
+        validate: {
+          len: [2, 4],
+        },
+      },
+      tel2: {
+        type: DataType.STRING(4),
+        validate: {
+          len: [3, 4],
+        },
+      },
+      tel3: {
+        type: DataType.STRING(4),
+        validate: {
+          len: 4,
+        },
+      },
     },
     {
       charset: 'utf8',
@@ -66,5 +95,10 @@ module.exports = (sequelize, DataType) => {
       paranoid: true,
     }
   );
+
+  User.associate = (models) => {
+    User.hasMany(models.Board);
+  };
+
   return User;
 };

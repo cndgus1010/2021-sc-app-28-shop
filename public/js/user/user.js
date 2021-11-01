@@ -16,7 +16,8 @@ function openPostcode() {
         extraRoadAddr += data.bname;
       }
       if (data.buildingName !== '' && data.apartment === 'Y') {
-        extraRoadAddr += extraRoadAddr !== '' ? ', ' + data.buildingName : data.buildingName;
+        extraRoadAddr +=
+          extraRoadAddr !== '' ? ', ' + data.buildingName : data.buildingName;
       }
       if (extraRoadAddr !== '') {
         extraRoadAddr = ' (' + extraRoadAddr + ')';
