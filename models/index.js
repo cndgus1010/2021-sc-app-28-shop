@@ -6,7 +6,7 @@ const config = require('../config/config')[env];
 config.timezone = '+09:00';
 const db = {};
 
-const sequelize = new Sequelize(config.database, config.username, config.password, config,);
+const sequelize = new Sequelize(config.database, config.username, config.password, config);
 fs.readdirSync(__dirname)
   .filter((file) => file !== 'index.js')
   .forEach((file) => {

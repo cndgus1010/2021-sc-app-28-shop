@@ -99,6 +99,5 @@ module.exports = (sequelize, DataType) => {
   User.associate = (models) => {
     User.hasMany(models.Board);
   };
-
   return User;
 };
