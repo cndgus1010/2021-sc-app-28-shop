@@ -2,8 +2,9 @@ const path = require('path');
 const express = require('express');
 const router = express.Router();
 const createError = require('http-errors');
-const { error, telNumber, alert, generateUser } = require('../../modules/util');
-const { User } = require('../../models');
+const { error, telNumber, alert, getStringTel } = require('../../modules/util');
+const { User, Sequelize } = require('../../models');
+const { Op } = Sequelize;
 const pager = require('../../middlewares/pager-mw');
 
 // 회원 등록 화면
@@ -19,17 +20,14 @@ router.get('/', (req, res, next) => {
 
 // 회원리스트
 router.get('/', pager(User), async (req, res, next) => {
-  let { field = 'id', search = '', sort = 'desc' } = req.query;
-  let where = search ? { [field]: { [Op.like]: '%' + search + '%' } } : null;
-  const rs = await User.findAll({
-    order: [[field, sort]],
-    offset: req.pager.startIdx || null,
-    limit: req.pager.listCnt || null,
-    where,
-  });
-  const users = generateUser(rs);
-  const ejs = { telNumber, pager: req.pager, users, field, search, sort };
-  res.render('admin/user/user-list', ejs);
+  try {
+    let { field = 'id', search = '', sort = 'desc' } = req.query;
+    const users = await User.searchUsers(req.query, req.pager);
+    const ejs = { telNumber, pager: req.pager, users, field, sort, search };
+    res.render('admin/user/user-list', ejs);
+  } catch (err) {
+    next(createError(err));
+  }
 });
 
 // 회원 수정 화면
@@ -44,6 +42,7 @@ router.get('/:id', (req, res, next) => {
 // 회원 저장
 router.post('/', async (req, res, next) => {
   try {
+    req.body.tel = getStringTel(req.body.tel1, req.body.tel2, req.body.tel3);
     const user = await User.create(req.body);
     user.save();
     res.send(alert('회원가입이 완료되었습니다.', '/admin/user'));
