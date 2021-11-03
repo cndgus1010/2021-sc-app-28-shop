@@ -84,7 +84,6 @@ const alert = (msg, loc = '/') => {
 
 const generateUser = (_users) => {
   const users = _users.map((v) => {
-    v.tel = v.tel1 && v.tel2 && v.tel3 ? v.tel1 + '-' + v.tel2 + '-' + v.tel3 : '';
     v.addr1 =
       v.addrPost && v.addrRoad
         ? `[${v.addrPost}] 
@@ -129,7 +128,7 @@ const getStringTel = (t1, t2, t3) => {
 };
 
 const getArrayTel = (tel) => {
-  return tel.include('-') ? tel.split('-') : [];
+  return tel.includes('-') ? tel.split('-') : [];
 };
 
 module.exports = {

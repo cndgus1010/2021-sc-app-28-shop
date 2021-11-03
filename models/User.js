@@ -23,11 +23,11 @@ module.exports = (sequelize, { DataTypes, Op }) => {
       userpw: {
         type: DataTypes.CHAR(60),
         allowNull: false,
-        // set(value) {
-        //   const { BCRYPT_SALT: salt, BCRYPT_ROUND: rnd } = process.env;
-        //   const hash = bcrypt.hashSync(value + salt, Number(rnd));
-        //   this.setDataValue('userpw', hash);
-        // },
+        /* set(value) {
+          const { BCRYPT_SALT: salt, BCRYPT_ROUND: rnd } = process.env;
+          const hash = bcrypt.hashSync(value + salt, Number(rnd));
+          this.setDataValue('userpw', hash);
+        }, */
       },
       username: {
         type: DataTypes.STRING(255),
@@ -36,6 +36,7 @@ module.exports = (sequelize, { DataTypes, Op }) => {
       email: {
         type: DataTypes.STRING(255),
         allowNull: false,
+        unique: true,
         validate: {
           isEmail: true,
         },
@@ -91,35 +92,25 @@ module.exports = (sequelize, { DataTypes, Op }) => {
 
   User.beforeCreate(async (user) => {
     const { BCRYPT_SALT: salt, BCRYPT_ROUND: rnd } = process.env;
-    const hash = await bcrypt.hashSync(user.userpw + salt, Number(rnd));
+    const hash = await bcrypt.hash(user.userpw + salt, Number(rnd));
     user.userpw = hash;
-    console.log(user);
   });
 
-  User.searchUsers = async function (query, pager) {
+  User.searchUser = async function (query, pager) {
     let { field = 'id', search = '', sort = 'desc' } = query;
     let where = search ? { [field]: { [Op.like]: '%' + search + '%' } } : null;
-    if (field === 'tel' && search !== '') {
-      where = {
-        [Op.or]: {
-          tel1: { [Op.like]: '%' + search + '%' },
-          tel2: { [Op.like]: '%' + search + '%' },
-          tel3: { [Op.like]: '%' + search + '%' },
-        },
-      };
-    }
     if (field === 'addrRoad' && search !== '') {
       where = {
         [Op.or]: {
           addrPost: { [Op.like]: '%' + search + '%' },
           addrRoad: { [Op.like]: '%' + search + '%' },
           addrJibun: { [Op.like]: '%' + search + '%' },
-          addrDetail: { [Op.like]: '%' + search + '%' },
           addrComment: { [Op.like]: '%' + search + '%' },
+          addrDetail: { [Op.like]: '%' + search + '%' },
         },
       };
     }
-    const rs = await User.findAll({
+    const rs = await this.findAll({
       order: [[field || 'id', sort || 'desc']],
       offset: pager.startIdx,
       limit: pager.listCnt,
