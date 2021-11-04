@@ -43,9 +43,10 @@ const generateUser = (_users) => {
 const generateWhere = (sequelize, Op, { field, search }) => {
   let where = search ? { [field]: { [Op.like]: '%' + search + '%' } } : null;
   if (field === 'tel' && search !== '') {
-    where = sequelize.where(sequelize.fn('replace', sequelize.col('tel'), '-', ''), {
-      [Op.like]: '%' + search.replace(/-/g, '') + '%',
-    });
+    where = sequelize.where(
+      sequelize.fn('replace', sequelize.col('tel'), '-', ''),
+      { [Op.like]: '%' + search.replace(/-/g, '') + '%' }
+    );
   }
   if (field === 'addrRoad' && search !== '') {
     where = {
@@ -153,7 +154,15 @@ module.exports = (sequelize, { DataTypes, Op }) => {
   );
 
   User.associate = (models) => {
-    User.hasMany(models.Board);
+    User.hasMany(models.Board, {
+      foreignKey: {
+        name: 'user_id',
+        allowNull: false,
+      },
+      sourceKey: 'id',
+      onUpdate: 'CASCADE',
+      onDelete: 'CASCADE',
+    });
   };
 
   User.beforeCreate(async (user) => {

@@ -54,4 +54,4 @@ module.exports = {
       { path: '/admin/board', name: '게시물 관리' },
     ],
   },
-};
+}

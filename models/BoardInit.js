@@ -14,8 +14,8 @@ module.exports = (sequelize, { DataTypes, Op }) => {
       },
       boardType: {
         type: DataTypes.ENUM,
-        values: ['D', 'G'],
-        defaultValue: 'D',
+        values: ['default', 'gallery'],
+        defaultValue: 'default',
         allowNull: false,
       },
       useImg: {
@@ -32,8 +32,8 @@ module.exports = (sequelize, { DataTypes, Op }) => {
       },
       useComment: {
         type: DataTypes.BOOLEAN,
-        defaultValue: false,
         allowNull: false,
+        defaultValue: false,
       },
     },
     {
@@ -43,5 +43,18 @@ module.exports = (sequelize, { DataTypes, Op }) => {
       paranoid: true,
     }
   );
+
+  BoardInit.associate = (models) => {
+    BoardInit.hasMany(models.Board, {
+      foreignKey: {
+        name: 'binit_id',
+        allowNull: false,
+      },
+      sourceKey: 'id',
+      onUpdate: 'CASCADE',
+      onDelete: 'CASCADE',
+    });
+  };
+
   return BoardInit;
 };
