@@ -17,9 +17,9 @@ module.exports = {
     }
     await queryInterface.bulkInsert('Board', insertBoard);
     const files = [
-      '211105_f07a2533-60e7-4c53-8479-2c189576ed2c.jpg',
-      '211104_65fde3ff-52df-4195-af72-ef588708a797.jpg',
-      '211104_c094c39a-dd2d-4f9d-8639-4c52b7d3346b.jpg',
+      '211105_1aa3050a-3d66-4cbd-b1a2-ee20d29960dd.png',
+      '211105_0b8bfb5b-f18d-4268-b2ab-40e2f77b37d5.png',
+      '211105_b892ab72-f85f-4d31-a763-fd84d677a201.png',
     ];
     for (let i = 50; i < 120; i++) {
       insertFile.push({
