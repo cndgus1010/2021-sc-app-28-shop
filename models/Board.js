@@ -24,6 +24,10 @@ module.exports = (sequelize, { DataTypes, Op }) => {
       content: {
         type: DataTypes.TEXT,
       },
+      readCounter: {
+        type: DataTypes.INTEGER(10).UNSIGNED,
+        defaulValue: 0,
+      },
     },
     {
       charset: 'utf8',
@@ -70,6 +74,15 @@ module.exports = (sequelize, { DataTypes, Op }) => {
       onUpdate: 'CASCADE',
       onDelete: 'CASCADE',
     });
+    Board.hasMany(models.BoardCounter, {
+      foreignKey: {
+        name: 'board_id',
+        allowNull: false,
+      },
+      sourceKey: 'id',
+      onUpdate: 'CASCADE',
+      onDelete: 'CASCADE',
+    });
   };
 
   Board.getCount = async function (query) {
@@ -85,6 +98,7 @@ module.exports = (sequelize, { DataTypes, Op }) => {
       .map((v) => v.toJSON())
       .map((v) => {
         v.updatedAt = dateFormat(v.updatedAt, type === 'view' ? 'H' : 'D');
+        v.readCounter = numeral(v.readCounter).format();
         v.files = [];
         if (v.BoardFiles.length) {
           for (let file of v.BoardFiles) {
