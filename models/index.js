@@ -8,13 +8,14 @@ config.timezone = '+09:00';
 const db = {};
 
 Sequelize.prototype.getWhere = function ({ field, search }) {
-  let where = search ? { [field]: { [Op.like]: '%' + search + '%' } } : {};
-  if (field === 'tel' && search !== '') {
+  let where = {};
+  if (field === 'tel') {
+    // 회원검색
     where = this.where(this.fn('replace', this.col('tel'), '-', ''), {
       [Op.like]: '%' + search.replace(/-/g, '') + '%',
     });
-  }
-  if (field === 'addrRoad' && search !== '') {
+  } else if (field === 'addrRoad') {
+    // 회원검색
     where = {
       [Op.or]: {
         addrPost: { [Op.like]: '%' + search + '%' },
@@ -24,6 +25,8 @@ Sequelize.prototype.getWhere = function ({ field, search }) {
         addrDetail: { [Op.like]: '%' + search + '%' },
       },
     };
+  } else {
+    where = search ? { [field]: { [Op.like]: '%' + search + '%' } } : {};
   }
   return where;
 };

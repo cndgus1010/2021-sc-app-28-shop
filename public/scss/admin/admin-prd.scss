@@ -58,9 +58,25 @@
         width: 50%;
         min-width: 300px;
         height: 80%;
-        border: 2px solid red;
+        border: 2px solid $dark-color;
         background-color: #fff;
-        overflow: scroll;
+        overflow-y: auto;
+        @include flex($h: center, $v: center);
+        @include flexCol;
+        #jstreeWrap {
+          margin-top: 1em;
+          width: 90%;
+          flex-grow: 1;
+        }
+      }
+    }
+    .selected-tree {
+      @include flex($w: wrap);
+      .tree-data {
+        padding: 0.25em 0.5em;
+        background-color: $white-color;
+        border: 1px solid $light-color;
+        margin: 0.25em;
       }
     }
   }
