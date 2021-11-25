@@ -1,7 +1,8 @@
 const _ = require('lodash');
 const numeral = require('numeral');
-const { dateFormat, relPath } = require('../modules/util');
+const { dateFormat, relPath, relThumbPath } = require('../modules/util');
 const createPager = require('../modules/pager-init');
+const { unescape } = require('html-escaper');
 
 module.exports = (sequelize, { DataTypes, Op }) => {
   const Product = sequelize.define(
@@ -47,7 +48,7 @@ module.exports = (sequelize, { DataTypes, Op }) => {
       },
       readCounter: {
         type: DataTypes.INTEGER(10).UNSIGNED,
-        defaulValue: 0,
+        defaultValue: 0,
       },
     },
     {
@@ -62,7 +63,7 @@ module.exports = (sequelize, { DataTypes, Op }) => {
     Product.hasMany(models.ProductFile, {
       foreignKey: {
         name: 'prd_id',
-        allowNull: false,
+        allowNull: true,
       },
       sourceKey: 'id',
       onUpdate: 'CASCADE',
@@ -71,7 +72,6 @@ module.exports = (sequelize, { DataTypes, Op }) => {
     Product.belongsToMany(models.Cate, {
       foreignKey: {
         name: 'prd_id',
-        allowNull: false,
       },
       through: 'cate_product',
       onUpdate: 'CASCADE',
@@ -85,47 +85,51 @@ module.exports = (sequelize, { DataTypes, Op }) => {
     });
   };
 
-  Product.getViewData = function (rs, type) {
+  Product.findProduct = async function (id, Cate, ProductFile) {
+    const rs = await this.findOne({
+      where: { id },
+      order: [[ProductFile, 'id', 'asc']],
+      include: [{ model: Cate }, { model: ProductFile }],
+    });
+    const data = rs.toJSON();
+    data.updatedAt = dateFormat(data.updatedAt, 'H');
+    data.readCounter = numeral(data.readCounter).format();
+    data.content = unescape(data.content);
+    data.imgs = [];
+    data.details = [];
+    if (data.ProductFiles.length) {
+      for (let file of data.ProductFiles) {
+        let obj = {
+          thumbSrc: relPath(file.saveName),
+          name: file.oriName,
+          id: file.id,
+          type: file.fileType,
+          fieldNum: file.fieldNum,
+        };
+        if (obj.type === 'F') data.details.push(obj);
+        else data.imgs.push(obj);
+      }
+    }
+    delete data.createdAt;
+    delete data.deletedAt;
+    delete data.ProductFiles;
+    return data;
+  };
+
+  Product.getListData = function (rs, type) {
     const data = rs
       .map((v) => v.toJSON())
       .map((v) => {
         v.priceOrigin = numeral(v.priceOrigin).format();
         v.priceSale = numeral(v.priceSale).format();
-        if (type === 'view') {
-          v.updatedAt = dateFormat(v.updatedAt, 'H');
-          v.readCounter = numeral(v.readCounter).format();
-          v.img = [];
-          v.detail = [];
-          if (v.ProductFiles.length) {
-            for (let file of v.ProductFiles) {
-              let obj = {
-                thumbSrc: relPath(file.saveName),
-                name: file.oriName,
-                id: file.id,
-                type: file.fileType,
-              };
-              if (obj.type === 'F') v.detail.push(obj);
-              else v.img.push(obj);
-            }
-          }
-        } else {
-          // list
-          if (v.ProductFiles.length) {
-            for (let file of v.ProductFiles) {
-              if (file.fileType === 'I') {
-                v.img = {
-                  thumbSrc: relPath(file.saveName),
-                };
-                break;
-              }
-            }
-          }
-          if (!v.img) {
-            v.img = {
-              thumbSrc: 'https://via.placeholder.com/120',
-            };
-          }
-        }
+        let idx = _.findIndex(
+          v.ProductFiles,
+          (v2) => v2.fieldNum == '1' && v2.fileType == 'I'
+        );
+        v.img =
+          idx > -1
+            ? relThumbPath(v.ProductFiles[idx].saveName)
+            : 'https://via.placeholder.com/120';
         delete v.createdAt;
         delete v.deletedAt;
         delete v.ProductFiles;
@@ -148,16 +152,16 @@ module.exports = (sequelize, { DataTypes, Op }) => {
       include: [
         {
           model: ProductFile,
-          attributes: ['id', 'saveName', 'fileType'],
+          attributes: ['id', 'saveName', 'fileType', 'fieldNum'],
         },
       ],
       order: [
         [field, sort],
-        [ProductFile, 'id', 'ASC'],
+        [ProductFile, 'fileType', 'ASC'],
+        [ProductFile, 'fieldNum', 'ASC'],
       ],
     });
-    const lists = this.getViewData(rs);
-
+    const lists = this.getListData(rs);
     return { lists, pager, totalRecord: numeral(pager.totalRecord).format() };
   };
 

@@ -4,8 +4,9 @@ const express = require('express');
 const { Cate } = require('../../models');
 const tree = require('../../middlewares/tree-mw');
 const { Op } = require('sequelize');
-const { findChildId, findObj } = require('../../modules/util');
+const { findAllId, findObj } = require('../../modules/util');
 const router = express.Router();
+const { isAdmin } = require('../../middlewares/auth-mw');
 
 router.get('/', async (req, res, next) => {
   try {
@@ -37,9 +38,9 @@ router.post('/', async (req, res, next) => {
   }
 });
 
-router.delete('/', tree(), async (req, res, next) => {
+router.delete('/', isAdmin(8), tree(), async (req, res, next) => {
   try {
-    const treeArray = findChildId(findObj(req.tree, req.body.id), []);
+    const treeArray = findAllId(findObj(req.tree, req.body.id), []);
     await Cate.destroy({ where: { id: { [Op.or]: treeArray } } });
     res.status(200).json({ success: true });
   } catch (err) {

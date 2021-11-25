@@ -26,8 +26,12 @@ module.exports = (sequelize, DataTypes) => {
         values: ['I', 'F'],
         defaultValue: 'I',
       },
+      fieldNum: {
+        type: DataTypes.INTEGER,
+        allowNull: false,
+      },
       size: {
-        type: DataTypes.INTEGER(10),
+        type: DataTypes.INTEGER,
         allowNull: false,
       },
     },
@@ -43,7 +47,7 @@ module.exports = (sequelize, DataTypes) => {
     ProductFile.belongsTo(models.Product, {
       foreignKey: {
         name: 'prd_id',
-        allowNull: false,
+        allowNull: true,
       },
       sourceKey: 'id',
       onUpdate: 'CASCADE',

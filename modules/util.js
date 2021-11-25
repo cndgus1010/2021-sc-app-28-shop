@@ -52,15 +52,30 @@ const zipExt = ['zip', 'alz'];
 const exts = { imgExt, mediaExt, docExt, zipExt };
 
 const relPath = (file) => `/uploads/${file.split('_')[0]}/${file}`;
+
+const relThumbPath = (file) => `/uploads/${file.split('_')[0]}/thumb/${file}`;
+
 const absPath = (file) =>
   path.join(__dirname, `../storages/${file.split('_')[0]}/${file}`);
+
+const absThumbPath = (file) =>
+  path.join(__dirname, `../storages/${file.split('_')[0]}/thumb/${file}`);
+
 const moveFile = async (file) => {
   try {
     let savePath = path.join(__dirname, '../storages-remove', file.split('_')[0]);
+    let saveThumbPath = path.join(savePath, 'thumb');
     let oldPath = absPath(file);
     await fs.ensureDir(savePath); // D:\ ~ /210909
     savePath = path.join(savePath, file); // D:\ ~ /210909/210909_fjk2134-askdf2103.jpg
     await fs.move(oldPath, savePath);
+
+    if (await fs.pathExists(absThumbPath(file))) {
+      let oldThumbPath = absThumbPath(file);
+      await fs.ensureDir(saveThumbPath);
+      saveThumbPath = path.join(saveThumbPath, file);
+      await fs.move(oldThumbPath, saveThumbPath);
+    }
     return true;
   } catch (err) {
     return err;
@@ -137,11 +152,34 @@ function findObj(_obj, id) {
   return findInner(_obj, id);
 }
 
-// _obj의 자식들의 id를 리턴하는 재귀함수
-function findChildId(_obj, arr) {
+// _obj의 자식의 id를 리턴하는 재귀함수
+function findChildId(_obj) {
+  const arr = [];
   if (_obj.children) {
     for (let v of _obj.children) {
-      findChildId(v, arr);
+      arr.push(v);
+    }
+  }
+  return arr;
+}
+
+// _obj의 자손들중 Endpoint id를 리턴하는 재귀함수
+function findLastId(_obj, arr) {
+  if (_obj.children.length) {
+    for (let v of _obj.children) {
+      findLastId(v, arr);
+    }
+  } else {
+    arr.push(_obj.id);
+  }
+  return arr;
+}
+
+// _obj의 자식들의 id를 리턴하는 재귀함수
+function findAllId(_obj, arr) {
+  if (_obj.children) {
+    for (let v of _obj.children) {
+      findAllId(v, arr);
     }
   }
   arr.push(_obj.id);
@@ -154,7 +192,9 @@ module.exports = {
   chgStatus,
   exts,
   relPath,
+  relThumbPath,
   absPath,
+  absThumbPath,
   getIcon,
   isImg,
   moveFile,
@@ -163,6 +203,8 @@ module.exports = {
   getSeparateString,
   getSeparateArray,
   dateFormat,
+  findLastId,
   findChildId,
+  findAllId,
   findObj,
 };
