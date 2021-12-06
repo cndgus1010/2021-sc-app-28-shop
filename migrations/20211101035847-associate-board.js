@@ -1,17 +1,17 @@
+'use strict';
+
 module.exports = {
   up: async (queryInterface, Sequelize) => {
-    await queryInterface.addColumn('board', 'user_id', {
-      type: Sequelize.INTEGER(10).UNSIGNED,
-      allowNull: true,
-      references: {
-        model: 'User',
-        key: 'id',
-      },
-      onUpdate: 'CASCADE',
-      onDelete: 'CASCADE',
+    await queryInterface.addColumn('user', 'tel1', {
+      type: Sequelize.STRING(4),
+    });
+    await queryInterface.addColumn('user', 'tel2', {
+      type: Sequelize.STRING(4),
+    });
+    await queryInterface.addColumn('user', 'tel3', {
+      type: Sequelize.STRING(4),
     });
   },
-  down: async (queryInterface, _Sequelize) => {
-    // await queryInterface.dropTable('users');
-  },
+
+  down: async (queryInterface, Sequelize) => {},
 };
