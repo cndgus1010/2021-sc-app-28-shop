@@ -1,13 +1,5 @@
 var core = {};
-var plugins = [
-  'contextmenu',
-  'dnd',
-  'search',
-  'state',
-  'wholerow',
-  'changed',
-  'types',
-];
+var plugins = ['contextmenu', 'dnd', 'search', 'state', 'wholerow', 'types'];
 
 var types = {
   default: {
@@ -31,10 +23,6 @@ core.data = {
   },
 };
 
-function onChangedTree(e, data) {
-  console.log(data.node.id);
-}
-
 function onCreateTree(e, data) {
   axios
     .post('/api/tree', { id: data.node.id })
@@ -55,7 +43,7 @@ function onDeleteTree(e, data) {
 
 function onUpdateTree() {
   axios
-    .put('/api/tree', { node: $('#jstreeWrap').jstree(true).get_json('#') })
+    .put('/api/tree', { node: $('#jstreeWrap').jstree().get_json('#') })
     .then(function (r) {
       $('#jstreeWrap').jstree().refresh();
     })
@@ -64,9 +52,14 @@ function onUpdateTree() {
     });
 }
 
+function onRenameTree(e, data) {
+  data.node.state.selected = false;
+  onUpdateTree();
+}
+
 $('#jstreeWrap')
   .jstree({ core: core, plugins: plugins, types })
   .on('create_node.jstree', onCreateTree)
-  .on('rename_node.jstree', onUpdateTree)
+  .on('rename_node.jstree', onRenameTree)
   .on('move_node.jstree', onUpdateTree)
   .on('delete_node.jstree', onDeleteTree);

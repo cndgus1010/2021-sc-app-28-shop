@@ -20,7 +20,7 @@ module.exports = (sequelize, { DataTypes, Op }) => {
       charset: 'utf8',
       collate: 'utf8_general_ci',
       tableName: 'cate',
-      paranoid: true,
+      paranoid: false,
     }
   );
 
@@ -58,7 +58,7 @@ module.exports = (sequelize, { DataTypes, Op }) => {
 
   Cate.getProduct = async function (query, Product, ProductFile) {
     try {
-      const { cid = 'j1_1', field, search, sort } = query;
+      const { cid = 'j1_1', field, search, sort, grp } = query;
       const [allTree] = await this.getAllCate();
       const myTree = findObj(allTree, cid);
       const lastTree = findLastId(myTree, []);
