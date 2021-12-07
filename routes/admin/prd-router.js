@@ -3,9 +3,19 @@ const express = require('express');
 const router = express.Router();
 const { escape, unescape } = require('html-escaper');
 const createError = require('http-errors');
+const convert = require('color-convert');
 const { error } = require('../../modules/util');
 const _ = require('lodash');
-const { Product, ProductFile, CateProduct, Cate } = require('../../models');
+const {
+  Product,
+  ProductFile,
+  CateProduct,
+  Cate,
+  Color,
+  Section,
+  ColorProduct,
+  SectionProduct,
+} = require('../../models');
 const uploader = require('../../middlewares/multer-mw');
 const afterUploader = require('../../middlewares/after-multer-mw');
 const sharpInit = require('../../middlewares/sharp-mw');
@@ -13,9 +23,21 @@ const { moveFile } = require('../../modules/util');
 const queries = require('../../middlewares/query-mw');
 const { isAdmin } = require('../../middlewares/auth-mw');
 
-router.get('/', queries(), (req, res, next) => {
+router.get('/', queries(), async (req, res, next) => {
   if (req.query.type === 'create') {
-    res.render('admin/prd/prd-form');
+    const color = await Color.findAll({ order: [['name', 'asc']] });
+    const colors = color.map((v) => {
+      v.style = `background-color: ${v.code};`;
+      return v;
+    });
+    const section = await Section.findAll({ order: [['name', 'asc']] });
+    const sections = section.map((v) => {
+      v.txtColor = convert.hex.hsl(v.color)[2] > 50 ? '#000000' : '#ffffff';
+      v.style = `background-color: ${v.color}; color: ${v.txtColor};`;
+      return v;
+    });
+    // res.json({ colors, sections });
+    res.render('admin/prd/prd-form', { colors, sections });
   } else next();
 });
 
@@ -34,9 +56,17 @@ router.get('/', queries(), async (req, res, next) => {
 
 router.get('/:id', queries(), async (req, res, next) => {
   try {
-    const prd = await Product.findProduct(req.params.id, Cate, ProductFile);
+    const prd = await Product.findProduct(req.params.id, {
+      Cate,
+      ProductFile,
+      Color,
+      Section,
+    });
     const cate = prd.Cates.map((v) => v.id);
-    res.render('admin/prd/prd-update', { prd, cate, _ });
+    const colors = Color.findAll({ order: [['name', 'asc']] });
+    const sections = Section.findAll({ order: [['name', 'asc']] });
+    // res.json({ prd, cate });
+    res.render('admin/prd/prd-update', { prd, cate, _, colors, sections });
   } catch (err) {
     next(createError(err));
   }
@@ -89,6 +119,18 @@ router.post(
           prd_id: product.id,
         }));
         if (req.body.cate !== '') await CateProduct.bulkCreate(catePrd);
+
+        const sectionPrd = req.body.section.map((id) => ({
+          section_id: id,
+          prd_id: product.id,
+        }));
+        if (req.body.section.length) await SectionProduct.bulkCreate(sectionPrd);
+
+        const colorPrd = req.body.color.map((id) => ({
+          color_id: id,
+          prd_id: product.id,
+        }));
+        if (req.body.color.length) await ColorProduct.bulkCreate(colorPrd);
         res.redirect('/admin/prd');
       }
     } catch (err) {
