@@ -63,9 +63,23 @@ router.get('/:id', queries(), async (req, res, next) => {
       Section,
     });
     const cate = prd.Cates.map((v) => v.id);
-    const colors = Color.findAll({ order: [['name', 'asc']] });
-    const sections = Section.findAll({ order: [['name', 'asc']] });
-    // res.json({ prd, cate });
+    const color = await Color.findAll({ order: [['name', 'asc']] });
+    const section = await Section.findAll({ order: [['name', 'asc']] });
+    const colors = color
+      .map((v) => v.toJSON())
+      .map((v) => {
+        v.checked = _.find(prd.Colors, ['id', v.id]) ? true : false;
+        v.style = `background-color: ${v.code};`;
+        return v;
+      });
+    const sections = section
+      .map((v) => v.toJSON())
+      .map((v) => {
+        v.checked = _.find(prd.Sections, ['id', v.id]) ? true : false;
+        v.txtColor = convert.hex.hsl(v.color)[2] > 50 ? '#000000' : '#ffffff';
+        v.style = `background-color: ${v.color}; color: ${v.txtColor};`;
+        return v;
+      });
     res.render('admin/prd/prd-update', { prd, cate, _, colors, sections });
   } catch (err) {
     next(createError(err));
@@ -96,56 +110,49 @@ router.post(
   queries('body'),
   async (req, res, next) => {
     try {
+      let id = '';
+      req.body.content = escape(req.body.content);
       if (req.body.type === 'update') {
-        req.body.content = escape(req.body.content);
-        await Product.update(req.body, { where: { id: req.body.id } });
-        req.files.forEach((file) => (file.prd_id = req.body.id));
-        const files = await ProductFile.bulkCreate(req.files);
-        await CateProduct.destroy({ where: { prd_id: req.body.id } });
-        const catePrd = req.body.cate.split(',').map((cate) => ({
-          cate_id: cate,
-          prd_id: req.body.id,
-        }));
-        if (req.body.cate !== '') await CateProduct.bulkCreate(catePrd);
-        // res.json({ file: req.files, req: req.body, locals: res.locals });
-        res.redirect(res.locals.goList);
+        // 수정에서 처리
+        id = req.body.id;
+        await Product.update(req.body, { where: { id } });
+        await CateProduct.destroy({ where: { prd_id: id } });
+        await ColorProduct.destroy({ where: { prd_id: id } });
+        await SectionProduct.destroy({ where: { prd_id: id } });
       } else {
-        req.body.content = escape(req.body.content);
+        // 등록에서 처리
         const product = await Product.create(req.body);
-        req.files.forEach((file) => (file.prd_id = product.id));
-        if (req.files.length) await ProductFile.bulkCreate(req.files);
-        const catePrd = req.body.cate.split(',').map((cate) => ({
-          cate_id: cate,
-          prd_id: product.id,
-        }));
-        if (req.body.cate !== '') await CateProduct.bulkCreate(catePrd);
-
-        const sectionPrd = req.body.section.map((id) => ({
-          section_id: id,
-          prd_id: product.id,
-        }));
-        if (req.body.section.length) await SectionProduct.bulkCreate(sectionPrd);
-
-        const colorPrd = req.body.color.map((id) => ({
-          color_id: id,
-          prd_id: product.id,
-        }));
-        if (req.body.color.length) await ColorProduct.bulkCreate(colorPrd);
-        res.redirect('/admin/prd');
+        id = product.id;
       }
+
+      // 공통 처리
+      req.files.forEach((file) => (file.prd_id = id));
+      if (req.files.length) await ProductFile.bulkCreate(req.files);
+
+      const catePrd = req.body.cate.split(',').map((cate) => ({
+        cate_id: cate,
+        prd_id: id,
+      }));
+      if (req.body.cate !== '') await CateProduct.bulkCreate(catePrd);
+
+      const sectionPrd = req.body.section.map((_id) => ({
+        section_id: _id,
+        prd_id: id,
+      }));
+      if (req.body.section.length) await SectionProduct.bulkCreate(sectionPrd);
+
+      const colorPrd = req.body.color.map((_id) => ({
+        color_id: _id,
+        prd_id: id,
+      }));
+      if (req.body.color.length) await ColorProduct.bulkCreate(colorPrd);
+
+      res.redirect(req.body.type === 'update' ? res.locals.goList : '/admin/prd');
     } catch (err) {
       next(createError(err));
     }
   }
 );
-
-router.put('/', async (req, res, next) => {
-  try {
-    res.redirect('/admin/prd');
-  } catch (err) {
-    next(createError(err));
-  }
-});
 
 router.put('/status', queries('body'), async (req, res, next) => {
   try {
@@ -167,6 +174,9 @@ router.delete('/', isAdmin(8), queries('body'), async (req, res, next) => {
     });
     for (let { saveName } of files) await moveFile(saveName);
     await ProductFile.destroy({ where: { prd_id: id } });
+    await CateProduct.destroy({ where: { prd_id: id } });
+    await SectionProduct.destroy({ where: { prd_id: id } });
+    await ColorProduct.destroy({ where: { prd_id: id } });
     res.redirect(res.locals.goList);
   } catch (err) {
     next(createError(err));

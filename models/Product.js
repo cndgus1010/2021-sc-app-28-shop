@@ -163,9 +163,23 @@ module.exports = (sequelize, { DataTypes, Op }) => {
       order: [[ProductFile, 'id', 'asc']],
       include: [
         { model: Cate },
-        { model: ProductFile },
-        { model: Color },
-        { model: Section },
+        {
+          model: ProductFile,
+        },
+        {
+          model: Color,
+          attributes: ['id'],
+          through: {
+            attributes: [],
+          },
+        },
+        {
+          model: Section,
+          attributes: ['id'],
+          through: {
+            attributes: [],
+          },
+        },
       ],
     });
     const data = rs.toJSON();
