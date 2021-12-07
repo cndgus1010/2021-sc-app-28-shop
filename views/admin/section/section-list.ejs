@@ -3,7 +3,7 @@
 <link rel="stylesheet" href="/css/admin-section.css">
 <section class="section-wrapper list-wrapper wrapper">
   <ul>
-    <%- include('./section-form.ejs', { color: '#333333', name: '분류명', id: '', txtColor: '#ffffff' }) %>
+    <%- include('./section-form.ejs', { color: '#333333', name: '', id: '', txtColor: '#ffffff' }) %>
     <% 
       for(let v of lists) { 
         let value = { color: v.color, method: 'PUT', id: v.id, name: v.name, txtColor: v.txtColor }
@@ -13,6 +13,5 @@
   </ul>
 </section>
 <script src="/js/color-convert.js"></script>
-<script>console.log(Color());</script>
 <script src="/js/section/section.js"></script>
 <%- include('../../inc/foot.ejs') %>
