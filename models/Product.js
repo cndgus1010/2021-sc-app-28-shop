@@ -47,8 +47,8 @@ module.exports = (sequelize, { DataTypes, Op }) => {
         type: DataTypes.TEXT,
         allowNull: true,
       },
-      start: {
-        type: DataTypes.DECIMAL(1, 1),
+      star: {
+        type: DataTypes.DECIMAL(2, 1),
         allowNull: true,
       },
       readCounter: {
@@ -106,13 +106,16 @@ module.exports = (sequelize, { DataTypes, Op }) => {
     });
   };
 
-  Product.findProducts = async function (query, Cate, ProductFile) {
+  Product.findProducts = async function (
+    query,
+    { Cate, Color, Section, ProductFile }
+  ) {
     try {
-      let { field, sort, page = 1, search, grp, cid = 'j1_1' } = query;
+      let { field, sort, page = 1, search, cid = 'j1_1' } = query;
       // tree
       const [allTree] = await Cate.getAllCate();
       const myTree = findObj(allTree, cid);
-      const lastTree = findLastId(myTree, []);
+      const endTree = findLastId(myTree, []);
       // pager
       let listCnt = 15;
       let pagerCnt = 5;
@@ -121,6 +124,7 @@ module.exports = (sequelize, { DataTypes, Op }) => {
 
       const rs = await Product.findAll({
         where: sequelize.getWhere(query, '2'),
+        // where: { '$Sections.name$': 'New' },
         offset: pager.startIdx,
         limit: pager.listCnt,
         attributes: [
@@ -129,6 +133,7 @@ module.exports = (sequelize, { DataTypes, Op }) => {
           'priceOrigin',
           'priceSale',
           'amount',
+          'star',
           'status',
           'summary',
           'readCounter',
@@ -137,9 +142,19 @@ module.exports = (sequelize, { DataTypes, Op }) => {
           {
             model: Cate,
             through: { attributes: [] },
-            attributes: [['id', 'cid']],
-            where: { id: { [Op.or]: [...lastTree] } },
+            attributes: ['id', 'name', 'parents'],
+            where: { id: { [Op.or]: [...endTree] } },
             order: [[field, sort]],
+          },
+          {
+            model: Color,
+            through: { attributes: [] },
+            attributes: ['id', 'name', 'code'],
+          },
+          {
+            model: Section,
+            through: { attributes: [] },
+            attributes: ['id', 'name', 'color'],
           },
           {
             model: ProductFile,
