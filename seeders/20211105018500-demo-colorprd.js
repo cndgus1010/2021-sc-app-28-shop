@@ -1,7 +1,7 @@
-const fs = require('fs-extra');
-const path = require('path');
-const _ = require('lodash');
-const { Color } = require('../models');
+const fs = require( 'fs-extra' );
+const path = require( 'path' );
+const _ = require( 'lodash' );
+const { Color } = require( '../models' );
 module.exports = {
   up: async (queryInterface, Sequelize) => {
     const insertColorPrd = [];

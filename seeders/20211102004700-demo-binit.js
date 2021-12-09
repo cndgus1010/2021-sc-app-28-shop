@@ -19,6 +19,15 @@ module.exports = {
       createdAt: new Date(),
       updatedAt: new Date(),
     });
+        insertBinit.push({
+      title: '베너관리',
+      boardType: 'gallery',
+      useImg: '5',
+      useFile: '2',
+      useComment: '1',
+      createdAt: new Date(),
+      updatedAt: new Date(),
+    });
 
     await queryInterface.bulkInsert('boardinit', insertBinit);
   },
