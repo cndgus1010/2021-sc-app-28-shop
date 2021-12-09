@@ -27,7 +27,7 @@ module.exports = {
       });
     }
     insertGallery.push({
-      binit_id: 5,
+      binit_id: 3,
       user_id: 1,
       title: '메인 상단 배너 입니다. ',
       writer: '최고관리자',
@@ -37,7 +37,7 @@ module.exports = {
       updatedAt: new Date(),
     });
     insertGallery.push({
-      binit_id: 5,
+      binit_id: 3,
       user_id: 1,
       title: '메인 패럴렉스 이미지 입니다. ',
       writer: '최고관리자',
