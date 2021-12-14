@@ -19,12 +19,21 @@ module.exports = {
       createdAt: new Date(),
       updatedAt: new Date(),
     });
-        insertBinit.push({
-      title: '베너관리',
+    insertBinit.push({
+      title: '관계사 링크',
       boardType: 'gallery',
-      useImg: '5',
-      useFile: '2',
-      useComment: '1',
+      useImg: '1',
+      useFile: '0',
+      useComment: '0',
+      createdAt: new Date(),
+      updatedAt: new Date(),
+    });
+    insertBinit.push({
+      title: '메인배너관리',
+      boardType: 'gallery',
+      useImg: '10',
+      useFile: '0',
+      useComment: '0',
       createdAt: new Date(),
       updatedAt: new Date(),
     });
